@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard Admin - CAMIONES{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Dashboard Administrativo</h1>
+    
+    <div class="upload-section">
+        <h2>Cargar Facturas</h2>
+        <button onclick="document.getElementById('pdf-input').click()">📄 Subir PDF</button>
+        <button onclick="document.getElementById('photo-input').click()">📷 Tomar Foto</button>
+        
+        <input type="file" id="pdf-input" accept=".pdf" style="display:none;">
+        <input type="file" id="photo-input" accept="image/*" capture="environment" style="display:none;">
+    </div>
+    
+    <div id="mapa" style="height: 500px; border: 1px solid #ccc;">
+        <!-- Aquí irá el mapa -->
+    </div>
+    
+    <div id="lista-entregas">
+        <!-- Lista de entregas por camión -->
+    </div>
+</div>
+{% endblock %}

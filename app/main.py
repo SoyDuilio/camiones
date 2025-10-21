@@ -1,4 +1,6 @@
-from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
+from pathlib import Path
+from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from app.database import engine, Base
@@ -19,8 +21,8 @@ app.include_router(chofer.router, prefix="/chofer", tags=["chofer"])
 app.include_router(api.router, prefix="/api", tags=["api"])
 
 @app.get("/")
-async def root():
-    return {"message": "Sistema CAMIONES - API Running"}
+async def home(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
 if __name__ == "__main__":
     import uvicorn

@@ -24,6 +24,12 @@ app.include_router(api.router, prefix="/api", tags=["api"])
 async def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
+
+@app.get("gerentes")
+async def gerentes(request: Request):
+    return templates.TemplateResponse("gerentes.html", {"request": request})
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+

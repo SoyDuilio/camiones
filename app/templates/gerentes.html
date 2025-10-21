@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema CAMIONES - Presentación Ejecutiva</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: #f1f5f9;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 24px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        .logo {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 48px;
+            font-weight: 800;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #06b6d4, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header .subtitle {
+            font-size: 24px;
+            color: #94a3b8;
+            font-weight: 300;
+        }
+
+        /* Section */
+        .section {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 24px;
+            padding: 48px;
+            margin-bottom: 48px;
+        }
+
+        .section-title {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .section-icon {
+            font-size: 48px;
+        }
+
+        .section-content {
+            font-size: 18px;
+            color: #cbd5e1;
+            line-height: 1.8;
+        }
+
+        /* Problem Section */
+        .problem-box {
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 4px solid #ef4444;
+            padding: 24px;
+            border-radius: 12px;
+            margin: 24px 0;
+        }
+
+        .problem-list {
+            list-style: none;
+            margin-top: 20px;
+        }
+
+        .problem-list li {
+            padding: 12px 0 12px 40px;
+            position: relative;
+            font-size: 17px;
+        }
+
+        .problem-list li:before {
+            content: "❌";
+            position: absolute;
+            left: 0;
+            font-size: 20px;
+        }
+
+        /* Solution Grid */
+        .solution-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-top: 32px;
+        }
+
+        .solution-card {
+            background: rgba(6, 182, 212, 0.1);
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            border-radius: 16px;
+            padding: 32px;
+            transition: all 0.3s;
+        }
+
+        .solution-card:hover {
+            transform: translateY(-8px);
+            border-color: #06b6d4;
+            box-shadow: 0 20px 40px rgba(6, 182, 212, 0.2);
+        }
+
+        .solution-card-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .solution-card h3 {
+            font-size: 24px;
+            margin-bottom: 12px;
+            color: #06b6d4;
+        }
+
+        .solution-card p {
+            color: #cbd5e1;
+            font-size: 16px;
+        }
+
+        /* Pillars */
+        .pillars-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 32px;
+            margin-top: 32px;
+        }
+
+        .pillar {
+            text-align: center;
+            padding: 32px 24px;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(6, 182, 212, 0.1));
+            border-radius: 16px;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .pillar-number {
+            font-size: 48px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #3b82f6, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 16px;
+        }
+
+        .pillar h4 {
+            font-size: 20px;
+            margin-bottom: 12px;
+            color: #3b82f6;
+        }
+
+        .pillar p {
+            font-size: 15px;
+            color: #94a3b8;
+        }
+
+        /* Benefits */
+        .benefits-list {
+            list-style: none;
+            margin-top: 24px;
+        }
+
+        .benefits-list li {
+            padding: 16px 0 16px 60px;
+            position: relative;
+            font-size: 18px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .benefits-list li:before {
+            content: "✅";
+            position: absolute;
+            left: 0;
+            font-size: 32px;
+        }
+
+        /* ROI Box */
+        .roi-box {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 182, 212, 0.2));
+            border: 2px solid #10b981;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            margin-top: 32px;
+        }
+
+        .roi-box h3 {
+            font-size: 32px;
+            color: #10b981;
+            margin-bottom: 24px;
+        }
+
+        .roi-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+        }
+
+        .roi-stat {
+            padding: 20px;
+        }
+
+        .roi-stat-value {
+            font-size: 48px;
+            font-weight: 800;
+            color: #10b981;
+            margin-bottom: 8px;
+        }
+
+        .roi-stat-label {
+            font-size: 16px;
+            color: #cbd5e1;
+        }
+
+        /* Technology Section */
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 32px;
+        }
+
+        .tech-card {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .tech-card:hover {
+            border-color: #06b6d4;
+            transform: translateY(-4px);
+        }
+
+        .tech-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+        }
+
+        .tech-card h4 {
+            font-size: 18px;
+            color: #06b6d4;
+            margin-bottom: 8px;
+        }
+
+        .tech-card p {
+            font-size: 14px;
+            color: #94a3b8;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            background: linear-gradient(135deg, #06b6d4, #3b82f6);
+            border-radius: 24px;
+            padding: 60px 48px;
+            text-align: center;
+            margin-top: 60px;
+        }
+
+        .cta-section h2 {
+            font-size: 40px;
+            margin-bottom: 20px;
+        }
+
+        .cta-section p {
+            font-size: 20px;
+            margin-bottom: 32px;
+            opacity: 0.9;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: white;
+            color: #0f172a;
+            padding: 16px 48px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Expandable Section */
+        .expandable {
+            margin-top: 24px;
+        }
+
+        .expandable-header {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 12px;
+            padding: 20px 24px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .expandable-header:hover {
+            background: rgba(59, 130, 246, 0.2);
+        }
+
+        .expandable-header h4 {
+            font-size: 20px;
+            color: #3b82f6;
+        }
+
+        .expandable-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s;
+            padding: 0 24px;
+        }
+
+        .expandable-content.active {
+            max-height: 1000px;
+            padding: 24px;
+        }
+
+        .arrow {
+            font-size: 24px;
+            transition: transform 0.3s;
+        }
+
+        .arrow.active {
+            transform: rotate(180deg);
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 32px;
+            }
+            
+            .section {
+                padding: 32px 24px;
+            }
+            
+            .solution-grid, .pillars-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">🚚</div>
+            <h1>Sistema CAMIONES</h1>
+            <p class="subtitle">Optimización Inteligente de Rutas de Distribución</p>
+        </div>
+
+        <!-- Problema -->
+        <div class="section">
+            <h2 class="section-title">
+                <span class="section-icon">⚠️</span>
+                El Problema Actual
+            </h2>
+            <div class="section-content">
+                <p>Su operación de distribución enfrenta desafíos significativos que impactan directamente en la <strong>rentabilidad</strong> y <strong>eficiencia operativa</strong>:</p>
+                
+                <div class="problem-box">
+                    <ul class="problem-list">
+                        <li><strong>Gestión Manual Ineficiente:</strong> El proceso de registro de facturas consume horas valiosas del personal administrativo, generando cuellos de botella operativos.</li>
+                        <li><strong>Pérdida de Información:</strong> Documentos físicos (facturas escritas a mano, tickets, guías) se extravían o son difíciles de procesar, causando inconsistencias en inventarios y facturación.</li>
+                        <li><strong>Rutas No Optimizadas:</strong> Las rutas se asignan empíricamente, sin considerar variables críticas como tráfico, capacidad vehicular, prioridad de clientes o consumo de combustible.</li>
+                        <li><strong>Sobrecostos en Combustible:</strong> Rutas ineficientes incrementan el consumo hasta en un 30-40%, afectando directamente el margen de utilidad.</li>
+                        <li><strong>Falta de Trazabilidad:</strong> No existe visibilidad en tiempo real de la flota, dificultando la atención de incidencias y la comunicación con clientes.</li>
+                        <li><strong>Datos Aislados:</strong> La información de logística no se comparte con otras áreas (finanzas, ventas, inventarios), perdiendo oportunidades de análisis integral.</li>
+                    </ul>
+                </div>
+
+                <p style="margin-top: 24px; font-size: 20px; color: #ef4444;"><strong>Resultado:</strong> Pérdida estimada de 15-25% en eficiencia operativa y márgenes reducidos por sobrecostos evitables.</p>
+            </div>
+        </div>
+
+        <!-- Solución -->
+        <div class="section">
+            <h2 class="section-title">
+                <span class="section-icon">💡</span>
+                La Solución: Sistema CAMIONES
+            </h2>
+            <div class="section-content">
+                <p>Una plataforma integral que digitaliza, automatiza y optimiza toda su operación de distribución mediante <strong>Inteligencia Artificial</strong> y <strong>algoritmos de optimización avanzados</strong>.</p>
+
+                <div class="solution-grid">
+                    <div class="solution-card">
+                        <div class="solution-card-icon">📄</div>
+                        <h3>Captura Inteligente</h3>
+                        <p>Extrae datos de facturas automáticamente mediante IA, incluso de documentos escritos a mano. Elimina errores de transcripción y ahorra hasta 4 horas diarias de trabajo manual.</p>
+                    </div>
+
+                    <div class="solution-card">
+                        <div class="solution-card-icon">🧠</div>
+                        <h3>Optimización Avanzada</h3>
+                        <p>Algoritmos que consideran 15+ variables (distancia, tráfico, capacidad, prioridad, combustible) para generar rutas óptimas que reducen costos hasta en 35%.</p>
+                    </div>
+
+                    <div class="solution-card">
+                        <div class="solution-card-icon">📍</div>
+                        <h3>Tracking en Tiempo Real</h3>
+                        <p>Visibilidad completa de su flota 24/7. Notificaciones automáticas de entregas, alertas de desvíos y comunicación directa con choferes.</p>
+                    </div>
+
+                    <div class="solution-card">
+                        <div class="solution-card-icon">📊</div>
+                        <h3>Inteligencia de Datos</h3>
+                        <p>Dashboard ejecutivo con KPIs en tiempo real. Integración con otros sistemas empresariales para análisis holístico y toma de decisiones basada en datos.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pilares -->
+        <div class="section">
+            <h2 class="section-title">
+                <span class="section-icon">🏛️</span>
+                Los 5 Pilares de la Solución
+            </h2>
+            <div class="pillars-grid">
+                <div class="pillar">
+                    <div class="pillar-number">01</div>
+                    <h4>Digitalización Automática</h4>
+                    <p>IA que lee y procesa documentos físicos (PDFs, fotos, manuscritos) extrayendo información crítica sin intervención humana.</p>
+                </div>
+
+                <div class="pillar">
+                    <div class="pillar-number">02</div>
+                    <h4>Motor de Optimización</h4>
+                    <p>Algoritmos que calculan las mejores rutas considerando múltiples restricciones y objetivos simultáneamente.</p>
+                </div>
+
+                <div class="pillar">
+                    <div class="pillar-number">03</div>
+                    <h4>Gestión de Capacidades</h4>
+                    <p>Control preciso de peso, volumen y cantidad por vehículo, evitando sobrecargas y maximizando utilización.</p>
+                </div>
+
+                <div class="pillar">
+                    <div class="pillar-number">04</div>
+                    <h4>Priorización Inteligente</h4>
+                    <p>Sistema que balancea urgencia, valor del pedido, tipo de cliente y restricciones horarias automáticamente.</p>
+                </div>
+
+                <div class="pillar">
+                    <div class="pillar-number">05</div>
+                    <h4>Ecosistema Integrado</h4>
+                    <p>Plataforma que se integra con ERP, finanzas, inventarios y CRM, eliminando silos de información.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Beneficios -->
+        <div class="section">
+            <h2 class="section-title">
+                <span class="section-icon">📈</span>
+                Beneficios Tangibles
+            </h2>
+            <div class="section-content">
+                <ul class="benefits-list">
+                    <li><strong>Reducción de Costos Operativos:</strong> Ahorro del 25-35% en combustible y 40% en tiempo administrativo.</li>
+                    <li><strong>Incremento en Productividad:</strong> Cada camión puede realizar 20-30% más entregas por día con las mismas horas de trabajo.</li>
+                    <li><strong>Mejora en Servicio al Cliente:</strong> Entregas más rápidas y precisas aumentan la satisfacción y retención de clientes.</li>
+                    <li><strong>Eliminación de Errores:</strong> La captura automatizada reduce errores de transcripción en 95%.</li>
+                    <li><strong>Trazabilidad Total:</strong> Cada entrega queda documentada con foto, hora exacta y ubicación GPS.</li>
+                    <li><strong>Escalabilidad:</strong> Sistema preparado para crecer junto con su operación sin costos adicionales significativos.</li>
+                    <li><strong>Decisiones Informadas:</strong> Reportes ejecutivos que revelan patrones, oportunidades y áreas de mejora.</li>
+                </ul>
+
+                <div class="roi-box">
+                    <h3>Retorno de Inversión Estimado</h3>
+                    <div class="roi-stats">
+                        <div class="roi-stat">
+                            <div class="roi-stat-value">4-6</div>
+                            <div class="roi-stat-label">Meses para ROI completo</div>
+                        </div>
+                        <div class="roi-stat">
+                            <div class="roi-stat-value">35%</div>
+                            <div class="roi-stat-label">Reducción de costos logísticos</div>
+                        </div>
+                        <div class="roi-stat">
+                            <div class="roi-stat-value">4hrs</div>
+                            <div class="roi-stat-label">Ahorradas diariamente en administración</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tecnología -->
+        <div class="section">
+            <h2 class="section-title">
+                <span class="section-icon">🔬</span>
+                Tecnología de Vanguardia
+            </h2>
+            <div class="section-content">
+                <p>El sistema utiliza las tecnologías más avanzadas disponibles en el mercado, las mismas que pueden aplicarse a otras áreas de su empresa:</p>
+
+                <div class="tech-grid">
+                    <div class="tech-card">
+                        <div class="tech-icon">🤖</div>
+                        <h4>Inteligencia Artificial</h4>
+                        <p>Gemini AI para procesamiento de documentos y toma de decisiones</p>
+                    </div>
+
+                    <div class="tech-card">
+                        <div class="tech-icon">🗺️</div>
+                        <h4>Mapas Inteligentes</h4>
+                        <p>APIs de Google Maps para rutas y tráfico en tiempo real</p>
+                    </div>
+
+                    <div class="tech-card">
+                        <div class="tech-icon">⚡</div>
+                        <h4>Cloud Computing</h4>
+                        <p>Infraestructura escalable y disponible 24/7</p>
+                    </div>
+
+                    <div class="tech-card">
+                        <div class="tech-icon">📱</div>
+                        <h4>Apps Móviles</h4>
+                        <p>Interfaces optimizadas para choferes en campo</p>
+                    </div>
+
+                    <div class="tech-card">
+                        <div class="tech-icon">🔗</div>
+                        <h4>APIs RESTful</h4>
+                        <p>Integración fácil con sistemas existentes</p>
+                    </div>
+
+                    <div class="tech-card">
+                        <div class="tech-icon">📊</div>
+                        <h4>Analytics Avanzado</h4>
+                        <p>Visualización de datos en tiempo real</p>
+                    </div>
+                </div>
+
+                <div class="expandable">
+                    <div class="expandable-header" onclick="toggleExpand(this)">
+                        <h4>💼 ¿Dónde más aplicar estas tecnologías?</h4>
+                        <span class="arrow">▼</span>
+                    </div>
+                    <div class="expandable-content">
+                        <p style="margin-bottom: 16px;">Las mismas capacidades tecnológicas pueden revolucionar otras áreas de su empresa:</p>
+                        <ul style="list-style: none; padding-left: 0;">
+                            <li style="padding: 12px 0; border-bottom: 1px solid rgba(148, 163, 184, 0.1);">
+                                <strong>📦 Gestión de Inventarios:</strong> Escaneo automático de productos, control de stock en tiempo real, alertas de reposición inteligentes.
+                            </li>
+                            <li style="padding: 12px 0; border-bottom: 1px solid rgba(148, 163, 184, 0.1);">
+                                <strong>💰 Contabilidad:</strong> Digitalización de facturas de proveedores, conciliación automática, detección de anomalías.
+                            </li>
+                            <li style="padding: 12px 0; border-bottom: 1px solid rgba(148, 163, 184, 0.1);">
+                                <strong>👥 Recursos Humanos:</strong> Procesamiento de CVs, gestión de asistencias, evaluación de desempeño automatizada.
+                            </li>
+                            <li style="padding: 12px 0; border-bottom: 1px solid rgba(148, 163, 184, 0.1);">
+                                <strong>🛒 Ventas:</strong> Predicción de demanda, segmentación de clientes, recomendaciones personalizadas.
+                            </li>
+                            <li style="padding: 12px 0;">
+                                <strong>🏭 Producción:</strong> Optimización de líneas de producción, mantenimiento predictivo, control de calidad por visión artificial.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="cta-section">
+            <h2>Transforme su Distribución Hoy</h2>
+            <p>Dé el siguiente paso hacia la eficiencia operativa y la rentabilidad sostenible</p>
+            <a href="#" class="cta-button" onclick="alert('Contacto: [email protected]'); return false;">Solicitar Demo Completa</a>
+        </div>
+    </div>
+
+    <script>
+        function toggleExpand(header) {
+            const content = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            
+            content.classList.toggle('active');
+            arrow.classList.toggle('active');
+        }
+    </script>
+</body>
+</html>

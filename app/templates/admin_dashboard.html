@@ -1,26 +1,1087 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="es" data-theme="cyber">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin - CAMIONES</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        /* Temas */
+        :root, [data-theme="cyber"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --accent-primary: #06b6d4;
+            --accent-secondary: #0ea5e9;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --border: #334155;
+        }
 
-{% block title %}Dashboard Admin - CAMIONES{% endblock %}
+        [data-theme="slate"] {
+            --bg-primary: #2d3748;
+            --bg-secondary: #374151;
+            --bg-tertiary: #4b5563;
+            --text-primary: #f9fafb;
+            --text-secondary: #d1d5db;
+            --accent-primary: #3b82f6;
+            --accent-secondary: #60a5fa;
+            --border: #4b5563;
+        }
 
-{% block content %}
-<div class="container">
-    <h1>Dashboard Administrativo</h1>
-    
-    <div class="upload-section">
-        <h2>Cargar Facturas</h2>
-        <button onclick="document.getElementById('pdf-input').click()">📄 Subir PDF</button>
-        <button onclick="document.getElementById('photo-input').click()">📷 Tomar Foto</button>
-        
-        <input type="file" id="pdf-input" accept=".pdf" style="display:none;">
-        <input type="file" id="photo-input" accept="image/*" capture="environment" style="display:none;">
+        [data-theme="purple"] {
+            --bg-primary: #1e1b4b;
+            --bg-secondary: #312e81;
+            --bg-tertiary: #4338ca;
+            --text-primary: #f5f3ff;
+            --text-secondary: #c4b5fd;
+            --accent-primary: #a855f7;
+            --accent-secondary: #c084fc;
+            --border: #4338ca;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            transition: background 0.3s;
+        }
+
+        .container { max-width: 1800px; margin: 0 auto; padding: 24px; }
+
+        /* Top Bar */
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-secondary);
+            padding: 16px 24px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border);
+        }
+
+        .logo-section { display: flex; align-items: center; gap: 12px; }
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .logo-text h1 { font-size: 20px; font-weight: 700; }
+        .logo-text p { font-size: 12px; color: var(--text-secondary); }
+
+        .topbar-controls { display: flex; gap: 12px; align-items: center; }
+
+        /* Botón Optimizar */
+        .btn-optimize {
+            background: linear-gradient(135deg, var(--success), #059669);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 10px;
+            border: none;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-optimize:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .action-btn {
+            padding: 10px 16px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+        }
+
+        .theme-toggle {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-primary);
+            font-size: 14px;
+            position: relative;
+        }
+
+        .theme-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 8px;
+            min-width: 200px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            display: none;
+            z-index: 1000;
+        }
+
+        .theme-menu.active { display: block; }
+
+        .theme-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .theme-option:hover { background: var(--bg-tertiary); }
+        .theme-option.active { border-color: var(--accent-primary); }
+
+        .theme-preview {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .theme-preview-color { flex: 1; height: 100%; }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent-primary);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .stat-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .stat-icon.cyan { background: rgba(6, 182, 212, 0.15); }
+        .stat-icon.green { background: rgba(16, 185, 129, 0.15); }
+        .stat-icon.yellow { background: rgba(245, 158, 11, 0.15); }
+
+        /* Main Grid */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .panel {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .panel-title {
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Upload Section */
+        .upload-grid { display: grid; gap: 12px; }
+
+        .upload-btn {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s;
+        }
+
+        .upload-btn:hover {
+            border-color: var(--accent-primary);
+            transform: translateX(4px);
+        }
+
+        .upload-btn-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .upload-btn-icon svg { width: 24px; height: 24px; stroke: white; }
+
+        .dropzone {
+            margin-top: 16px;
+            border: 2px dashed var(--border);
+            border-radius: 10px;
+            padding: 48px 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .dropzone:hover, .dropzone.dragover {
+            border-color: var(--accent-primary);
+            background: rgba(6, 182, 212, 0.05);
+        }
+
+        .dropzone-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 16px;
+            background: rgba(6, 182, 212, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Map */
+        #mapa {
+            height: 500px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        /* Modal de Resultados */
+        .optimization-results {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            z-index: 3000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .optimization-results.active { display: flex; }
+
+        .results-content {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 900px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .results-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 32px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .results-icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--success), #059669);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+        }
+
+        .metrics-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .metric-box {
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .metric-value-big {
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--success);
+            margin-bottom: 8px;
+        }
+
+        .rutas-list { display: grid; gap: 16px; }
+
+        .ruta-item {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .ruta-item:hover {
+            border-color: var(--accent-primary);
+            transform: translateX(4px);
+        }
+
+        .score-badge {
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .score-excellent { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+        .score-good { background: rgba(6, 182, 212, 0.2); color: var(--accent-primary); }
+        .score-fair { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+
+        /* Panel Configuración */
+        .config-panel {
+            display: none;
+            position: fixed;
+            top: 0;
+            right: -600px;
+            width: 600px;
+            height: 100vh;
+            background: var(--bg-secondary);
+            border-left: 1px solid var(--border);
+            box-shadow: -10px 0 40px rgba(0, 0, 0, 0.3);
+            z-index: 4000;
+            transition: right 0.3s;
+            overflow-y: auto;
+        }
+
+        .config-panel.active {
+            display: block;
+            right: 0;
+        }
+
+        .config-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .config-content { padding: 24px; }
+        .config-section { margin-bottom: 32px; }
+        .config-section h3 {
+            font-size: 18px;
+            margin-bottom: 16px;
+            color: var(--accent-primary);
+        }
+
+        .config-group { margin-bottom: 20px; }
+        .config-group label {
+            display: block;
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .config-group input {
+            width: 100%;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        .range-value {
+            text-align: center;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent-primary);
+            margin-bottom: 8px;
+        }
+
+        /* Processing */
+        .processing-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .processing-overlay.active { display: flex; }
+
+        .spinner {
+            width: 56px;
+            height: 56px;
+            border: 4px solid rgba(6, 182, 212, 0.3);
+            border-top-color: var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Camera Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active { display: flex; }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        #video {
+            width: 100%;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .main-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            .topbar { flex-direction: column; gap: 16px; }
+            .stats-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Top Bar -->
+        <div class="topbar">
+            <div class="logo-section">
+                <div class="logo-icon">🚚</div>
+                <div class="logo-text">
+                    <h1>CAMIONES</h1>
+                    <p>Sistema de Gestión de Rutas</p>
+                </div>
+            </div>
+            <div class="topbar-controls">
+                <button class="btn-optimize" onclick="ejecutarOptimizacion()">
+                    <span>⚡</span>
+                    <span>Optimizar Rutas</span>
+                </button>
+
+                <button class="action-btn" onclick="resetearSistema()">🔄 Resetear</button>
+
+                <button class="action-btn" onclick="abrirConfiguracion()">⚙️</button>
+                <div class="theme-toggle" onclick="toggleThemeMenu()">
+                    <span>🎨</span>
+                    <div class="theme-menu" id="theme-menu">
+                        <div class="theme-option active" data-theme="cyber" onclick="changeTheme('cyber', event)">
+                            <div class="theme-preview">
+                                <div class="theme-preview-color" style="background: #0f172a;"></div>
+                                <div class="theme-preview-color" style="background: #06b6d4;"></div>
+                            </div>
+                            <div><h4 style="font-size:14px;">Cyber Blue</h4></div>
+                        </div>
+                        <div class="theme-option" data-theme="slate" onclick="changeTheme('slate', event)">
+                            <div class="theme-preview">
+                                <div class="theme-preview-color" style="background: #2d3748;"></div>
+                                <div class="theme-preview-color" style="background: #3b82f6;"></div>
+                            </div>
+                            <div><h4 style="font-size:14px;">Corporate Slate</h4></div>
+                        </div>
+                        <div class="theme-option" data-theme="purple" onclick="changeTheme('purple', event)">
+                            <div class="theme-preview">
+                                <div class="theme-preview-color" style="background: #1e1b4b;"></div>
+                                <div class="theme-preview-color" style="background: #a855f7;"></div>
+                            </div>
+                            <div><h4 style="font-size:14px;">Executive Purple</h4></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span style="font-size:13px; color:var(--text-secondary);">ENTREGAS HOY</span>
+                    <div class="stat-icon cyan">📦</div>
+                </div>
+                <div style="font-size:32px; font-weight:700; margin-bottom:8px;" id="entregas-total">0</div>
+                <div style="font-size:13px; color:var(--success);" id="porcentaje-completado">0% completado</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span style="font-size:13px; color:var(--text-secondary);">COMPLETADAS</span>
+                    <div class="stat-icon green">✅</div>
+                </div>
+                <div style="font-size:32px; font-weight:700; margin-bottom:8px;" id="entregas-completadas">0</div>
+                <div style="font-size:13px; color:var(--text-secondary);">En tiempo</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span style="font-size:13px; color:var(--text-secondary);">VALOR ENTREGADO</span>
+                    <div class="stat-icon green">💰</div>
+                </div>
+                <div style="font-size:32px; font-weight:700; margin-bottom:8px;" id="valor-entregado">S/ 0</div>
+                <div style="font-size:13px; color:var(--text-secondary);">De <span id="valor-total">S/ 0</span></div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span style="font-size:13px; color:var(--text-secondary);">PENDIENTE</span>
+                    <div class="stat-icon yellow">⏱️</div>
+                </div>
+                <div style="font-size:32px; font-weight:700; margin-bottom:8px;" id="entregas-pendientes">0</div>
+                <div style="font-size:13px; color:var(--text-secondary);">S/ <span id="valor-pendiente">0</span></div>
+            </div>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="main-grid">
+            <!-- Upload -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h3 class="panel-title">📋 Cargar Facturas</h3>
+                </div>
+                <div class="upload-grid">
+                    <div class="upload-btn" onclick="openCamera()">
+                        <div class="upload-btn-icon">📷</div>
+                        <div>
+                            <h4>Capturar Factura</h4>
+                            <p style="font-size:13px; color:var(--text-secondary);">Usa la cámara</p>
+                        </div>
+                    </div>
+                    <div class="upload-btn" onclick="document.getElementById('file-input').click()">
+                        <div class="upload-btn-icon">📄</div>
+                        <div>
+                            <h4>Subir Archivos</h4>
+                            <p style="font-size:13px; color:var(--text-secondary);">PDF, Excel, CSV, Imágenes</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="dropzone" id="dropzone">
+                    <div class="dropzone-icon">⬇️</div>
+                    <h4>Arrastra archivos aquí</h4>
+                    <p style="color:var(--text-secondary); font-size:14px;">Múltiples formatos soportados</p>
+                </div>
+                <input type="file" id="file-input" accept=".pdf,.xls,.xlsx,.csv,.txt,image/*" multiple style="display:none;">
+            </div>
+
+            <!-- Map -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h3 class="panel-title">🗺️ Tracking en Tiempo Real</h3>
+                </div>
+                <div id="mapa"></div>
+            </div>
+        </div>
+
+        <!-- Flota Activa -->
+        <div class="panel" style="margin-top: 24px;">
+            <div class="panel-header">
+                <h3 class="panel-title">🚛 Flota Activa</h3>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px;" id="flota-grid">
+                <!-- Cards se cargan con JS -->
+            </div>
+        </div>
     </div>
-    
-    <div id="mapa" style="height: 500px; border: 1px solid #ccc;">
-        <!-- Aquí irá el mapa -->
+
+    <!-- Modals -->
+    <!-- Modal de Resultados -->
+    <div class="optimization-results" id="optimization-results">
+        <div class="results-content">
+            <div class="results-header">
+                <div class="results-icon">🎯</div>
+                <div>
+                    <h2>Optimización Completada</h2>
+                    <p id="optimization-message"></p>
+                </div>
+                <button style="margin-left:auto; background:none; border:none; font-size:24px; cursor:pointer; color:var(--text-primary);" onclick="cerrarResultados()">×</button>
+            </div>
+
+            <!-- Parámetros Aplicados -->
+            <div style="background: var(--bg-tertiary); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+                <h4 style="margin-bottom: 12px; color: var(--accent-primary);">⚙️ Parámetros Aplicados</h4>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; font-size: 14px;">
+                    <div><span style="color: var(--text-secondary);">Algoritmo:</span> <strong>Greedy + Nearest Neighbor</strong></div>
+                    <div><span style="color: var(--text-secondary);">Tiempo de cálculo:</span> <strong id="tiempo-calculo">0.5s</strong></div>
+                    <div><span style="color: var(--text-secondary);">Factor distancia:</span> <strong>40%</strong></div>
+                    <div><span style="color: var(--text-secondary);">Factor prioridad:</span> <strong>25%</strong></div>
+                    <div><span style="color: var(--text-secondary);">Factor combustible:</span> <strong>20%</strong></div>
+                    <div><span style="color: var(--text-secondary);">Factor tiempo:</span> <strong>15%</strong></div>
+                </div>
+            </div>
+
+            <div class="metrics-summary" id="metrics-summary"></div>
+
+            <h3 style="margin-bottom: 16px;">Rutas Generadas</h3>
+            <div class="rutas-list" id="rutas-list"></div>
+
+            <div style="display:flex; gap:12px; margin-top:32px;">
+                <button class="btn-optimize" onclick="aceptarYContinuar()" style="flex:1;">✅ Aceptar y Continuar</button>
+                <button class="action-btn" onclick="generarAlternativas()" style="flex:1;">🔄 Rutas Alternativas</button>
+                <button class="btn-secondary btn" onclick="cancelarOptimizacion()" style="flex:1;">❌ Cancelar</button>
+            </div>
+        </div>
     </div>
-    
-    <div id="lista-entregas">
-        <!-- Lista de entregas por camión -->
+
+    <div class="config-panel" id="config-panel">
+        <div class="config-header">
+            <h2>⚙️ Configuración</h2>
+            <button onclick="cerrarConfiguracion()" style="background:none; border:none; font-size:20px; cursor:pointer;">×</button>
+        </div>
+        <div class="config-content">
+            <div class="config-section">
+                <h3>Pesos de Optimización</h3>
+                <div class="config-group">
+                    <label>Distancia</label>
+                    <div class="range-value" id="peso-distancia-val">40%</div>
+                    <input type="range" id="peso-distancia" min="0" max="100" value="40" oninput="actualizarPeso('distancia', this.value)">
+                </div>
+                <div class="config-group">
+                    <label>Prioridad</label>
+                    <div class="range-value" id="peso-prioridad-val">25%</div>
+                    <input type="range" id="peso-prioridad" min="0" max="100" value="25" oninput="actualizarPeso('prioridad', this.value)">
+                </div>
+            </div>
+            <button class="btn-optimize" style="width:100%;" onclick="guardarConfiguracion()">💾 Guardar</button>
+        </div>
     </div>
-</div>
-{% endblock %}
+
+    <div class="modal" id="camera-modal">
+        <div class="modal-content">
+            <h2>📷 Capturar Factura</h2>
+            <video id="video" autoplay></video>
+            <canvas id="canvas" style="display:none;"></canvas>
+            <div style="display:flex; gap:12px; margin-top:20px;">
+                <button class="btn btn-primary" onclick="capturePhoto()">Capturar</button>
+                <button class="btn btn-secondary" onclick="closeCamera()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="processing-overlay" id="processing-overlay">
+        <div style="text-align:center;">
+            <div class="spinner"></div>
+            <h3>Procesando...</h3>
+        </div>
+    </div>
+
+    <script>
+        let map, videoStream;
+
+        let ultimaOptimizacion = null;
+
+        function aceptarYContinuar() {
+            cerrarResultados();
+            cargarStats();
+            alert('✅ Rutas guardadas. Los choferes ya pueden ver sus asignaciones.');
+        }
+
+        function cancelarOptimizacion() {
+            if (confirm('¿Descartar estas rutas y volver a optimizar?')) {
+                // Aquí llamarías a un endpoint para eliminar las rutas recién creadas
+                cerrarResultados();
+                alert('Rutas descartadas. Puedes optimizar nuevamente.');
+            }
+        }
+
+        async function generarAlternativas() {
+            if (confirm('Esto generará rutas alternativas con diferentes parámetros. ¿Continuar?')) {
+                // Modificar temporalmente los pesos
+                alert('🔄 Generando alternativas con algoritmo de Clarke-Wright...\n(Función en desarrollo)');
+            }
+        }
+
+        function mostrarResultados(data) {
+            document.getElementById('optimization-message').textContent = data.message;
+            document.getElementById('tiempo-calculo').textContent = data.metricas.tiempo_calculo_segundos + 's';
+            ultimaOptimizacion = data;
+            
+            // ... resto del código existente
+        }
+
+        function loadFlota() {
+            const camiones = [
+                { id: 1, placa: "AQP-123", chofer: "Juan Pérez", entregas: 0, completadas: 0 },
+                { id: 2, placa: "IQT-456", chofer: "Carlos Ruiz", entregas: 0, completadas: 0 },
+                { id: 3, placa: "TRU-789", chofer: "Miguel Torres", entregas: 0, completadas: 0 },
+                { id: 4, placa: "LIM-012", chofer: "Roberto Sánchez", entregas: 0, completadas: 0 },
+                { id: 5, placa: "CUS-345", chofer: "José García", entregas: 0, completadas: 0 },
+            ];
+
+            const grid = document.getElementById('flota-grid');
+            grid.innerHTML = camiones.map(c => {
+                const progreso = c.entregas > 0 ? (c.completadas / c.entregas * 100).toFixed(0) : 0;
+                return `
+                    <div style="background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 12px; padding: 20px; cursor: pointer; transition: all 0.2s;" 
+                        onmouseover="this.style.borderColor='var(--accent-primary)'" 
+                        onmouseout="this.style.borderColor='var(--border)'">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                            <div style="font-size: 18px; font-weight: 700;">${c.placa}</div>
+                            <div style="width: 12px; height: 12px; background: var(--success); border-radius: 50%;"></div>
+                        </div>
+                        <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 16px;">👤 ${c.chofer}</div>
+                        <div>
+                            <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 8px;">
+                                <span>Entregas</span>
+                                <span><strong>${c.completadas}</strong> / ${c.entregas}</span>
+                            </div>
+                            <div style="height: 6px; background: var(--bg-primary); border-radius: 10px; overflow: hidden;">
+                                <div style="height: 100%; width: ${progreso}%; background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary)); border-radius: 10px; transition: width 0.5s;"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Theme
+        function toggleThemeMenu() {
+            document.getElementById('theme-menu').classList.toggle('active');
+        }
+
+        function changeTheme(theme, event) {
+            event.stopPropagation();
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('preferred-theme', theme);
+            document.querySelectorAll('.theme-option').forEach(o => o.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            document.getElementById('theme-menu').classList.remove('active');
+        }
+
+        function loadSavedTheme() {
+            const saved = localStorage.getItem('preferred-theme') || 'cyber';
+            document.documentElement.setAttribute('data-theme', saved);
+            document.querySelectorAll('.theme-option').forEach(o => {
+                if (o.dataset.theme === saved) o.classList.add('active');
+                else o.classList.remove('active');
+            });
+        }
+
+        // Stats
+        async function cargarStats() {
+            try {
+                const res = await fetch('/api/dashboard/stats');
+                const data = await res.json();
+                document.getElementById('entregas-total').textContent = data.entregas_total;
+                document.getElementById('entregas-completadas').textContent = data.entregas_completadas;
+                document.getElementById('entregas-pendientes').textContent = data.entregas_pendientes;
+                document.getElementById('valor-entregado').textContent = 'S/ ' + data.valor_entregado.toLocaleString();
+                document.getElementById('valor-total').textContent = 'S/ ' + data.valor_total.toLocaleString();
+                document.getElementById('valor-pendiente').textContent = data.valor_pendiente.toLocaleString();
+                document.getElementById('porcentaje-completado').textContent = data.porcentaje_completado + '%';
+            } catch (e) {}
+        }
+
+        // Optimización
+        async function ejecutarOptimizacion() {
+            document.getElementById('processing-overlay').classList.add('active');
+            try {
+                const res = await fetch('/api/optimizar-rutas', { method: 'POST' });
+                const data = await res.json();
+                document.getElementById('processing-overlay').classList.remove('active');
+                if (data.success) {
+                    mostrarResultados(data);
+                    cargarStats();
+                } else {
+                    alert(data.message);
+                }
+            } catch (e) {
+                document.getElementById('processing-overlay').classList.remove('active');
+                alert('Error: ' + e.message);
+            }
+        }
+
+        function mostrarResultados(data) {
+            document.getElementById('optimization-message').textContent = data.message;
+            document.getElementById('metrics-summary').innerHTML = `
+                <div class="metric-box"><div class="metric-value-big">${data.rutas_creadas}</div><div>Rutas</div></div>
+                <div class="metric-box"><div class="metric-value-big">${data.entregas_asignadas}</div><div>Entregas</div></div>
+                <div class="metric-box"><div class="metric-value-big">${data.metricas.distancia_total_km} km</div><div>Distancia</div></div>
+                <div class="metric-box"><div class="metric-value-big">S/ ${data.metricas.costo_total_estimado.toLocaleString()}</div><div>Costo</div></div>
+            `;
+            document.getElementById('rutas-list').innerHTML = data.rutas.map(r => {
+                const sc = r.score_optimizacion >= 80 ? 'excellent' : r.score_optimizacion >= 60 ? 'good' : 'fair';
+                return `<div class="ruta-item">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
+                        <div><div style="font-size:18px; font-weight:700;">${r.codigo}</div>
+                        <div style="font-size:14px; color:var(--text-secondary);">${r.camion_placa} - ${r.chofer_nombre}</div></div>
+                        <div class="score-badge score-${sc}">${r.score_optimizacion}%</div>
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; font-size:13px;">
+                        <div><span style="color:var(--text-secondary);">Entregas</span><br><strong>${r.cantidad_entregas}</strong></div>
+                        <div><span style="color:var(--text-secondary);">Distancia</span><br><strong>${r.distancia_total_km} km</strong></div>
+                        <div><span style="color:var(--text-secondary);">Costo</span><br><strong>S/ ${r.costo_total_estimado.toLocaleString()}</strong></div>
+                    </div>
+                </div>`;
+            }).join('');
+            document.getElementById('optimization-results').classList.add('active');
+        }
+
+        function cerrarResultados() {
+            document.getElementById('optimization-results').classList.remove('active');
+        }
+
+        // Config
+        function abrirConfiguracion() {
+            document.getElementById('config-panel').classList.add('active');
+        }
+
+        function cerrarConfiguracion() {
+            document.getElementById('config-panel').classList.remove('active');
+        }
+
+        function actualizarPeso(tipo, valor) {
+            document.getElementById(`peso-${tipo}-val`).textContent = valor + '%';
+        }
+
+        async function guardarConfiguracion() {
+            const params = {
+                peso_distancia: parseInt(document.getElementById('peso-distancia').value),
+                peso_prioridad_cliente: parseInt(document.getElementById('peso-prioridad').value)
+            };
+            try {
+                await fetch('/api/parametros-optimizacion', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(params)
+                });
+                alert('✅ Guardado');
+                cerrarConfiguracion();
+            } catch (e) {}
+        }
+
+        // Camera
+        function openCamera() {
+            document.getElementById('camera-modal').classList.add('active');
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+                .then(stream => {
+                    videoStream = stream;
+                    document.getElementById('video').srcObject = stream;
+                }).catch(() => { alert('No se pudo acceder a la cámara'); closeCamera(); });
+        }
+
+        function closeCamera() {
+            document.getElementById('camera-modal').classList.remove('active');
+            if (videoStream) {
+                videoStream.getTracks().forEach(t => t.stop());
+                videoStream = null;
+            }
+        }
+
+        async function capturePhoto() {
+            const video = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            canvas.toBlob(async (blob) => {
+                closeCamera();
+                const formData = new FormData();
+                formData.append('file', blob, 'factura.jpg');
+                document.getElementById('processing-overlay').classList.add('active');
+                try {
+                    await fetch('/api/upload-photo', { method: 'POST', body: formData });
+                    alert('✅ Factura procesada');
+                } catch (e) {}
+                document.getElementById('processing-overlay').classList.remove('active');
+            }, 'image/jpeg');
+        }
+
+        // Dropzone
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('file-input');
+
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.classList.add('dragover');
+        });
+
+        dropzone.addEventListener('dragleave', () => {
+            dropzone.classList.remove('dragover');
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        dropzone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
+
+        async function handleFiles(files) {
+            document.getElementById('processing-overlay').classList.add('active');
+            for (let file of files) {
+                const formData = new FormData();
+                formData.append('file', file);
+                const endpoint = file.type.includes('pdf') ? '/api/upload-pdf' : '/api/upload-photo';
+                try {
+                    await fetch(endpoint, { method: 'POST', body: formData });
+                } catch (e) {}
+            }
+            document.getElementById('processing-overlay').classList.remove('active');
+            alert('✅ Facturas procesadas');
+        }
+
+        // Map
+        function initMap() {
+            map = L.map('mapa').setView([-3.7437, -73.2516], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        }
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSavedTheme();
+            initMap();
+            cargarStats();
+            setInterval(cargarStats, 30000);
+
+            loadFlota();
+        });
+
+        async function resetearSistema() {
+            if (!confirm('Esto eliminará todas las rutas actuales y permitirá optimizar de nuevo. ¿Continuar?')) {
+                return;
+            }
+            
+            try {
+                // Llamar endpoint para resetear
+                const res = await fetch('/api/resetear-rutas', { method: 'POST' });
+                if (res.ok) {
+                    alert('✅ Sistema reseteado. Puedes optimizar nuevamente.');
+                    cargarStats();
+                }
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
+        }
+    </script>
+</body>
+</html>
